@@ -84,21 +84,23 @@ namespace Lidgren.Network
 		/// <summary>
 		/// Writes a boolean value using 1 bit
 		/// </summary>
-		public void Write(bool value)
+		public NetBuffer Write(bool value)
 		{
 			EnsureBufferSize(m_bitLength + 1);
 			NetBitWriter.WriteByte((value ? (byte)1 : (byte)0), 1, m_data, m_bitLength);
 			m_bitLength += 1;
+			return this;
 		}
 
 		/// <summary>
 		/// Write a byte
 		/// </summary>
-		public void Write(byte source)
+		public NetBuffer Write(byte source)
 		{
 			EnsureBufferSize(m_bitLength + 8);
 			NetBitWriter.WriteByte(source, 8, m_data, m_bitLength);
 			m_bitLength += 8;
+			return this;
 		}
 
 		/// <summary>
@@ -164,11 +166,12 @@ namespace Lidgren.Network
 		/// </summary>
 		/// <param name="source"></param>
 		[CLSCompliant(false)]
-		public void Write(UInt16 source)
+		public NetBuffer Write(UInt16 source)
 		{
 			EnsureBufferSize(m_bitLength + 16);
 			NetBitWriter.WriteUInt16(source, 16, m_data, m_bitLength);
 			m_bitLength += 16;
+			return this;
 		}
 
 		/// <summary>
@@ -198,11 +201,12 @@ namespace Lidgren.Network
 		/// <summary>
 		/// Writes a signed 16 bit integer
 		/// </summary>
-		public void Write(Int16 source)
+		public NetBuffer Write(Int16 source)
 		{
 			EnsureBufferSize(m_bitLength + 16);
 			NetBitWriter.WriteUInt16((ushort)source, 16, m_data, m_bitLength);
 			m_bitLength += 16;
+			return this;
 		}
 
 		/// <summary>
@@ -220,7 +224,7 @@ namespace Lidgren.Network
 		/// <summary>
 		/// Writes a 32 bit signed integer
 		/// </summary>
-		public unsafe void Write(Int32 source)
+		public unsafe NetBuffer Write(Int32 source)
 		{
 			EnsureBufferSize(m_bitLength + 32);
 
@@ -237,16 +241,18 @@ namespace Lidgren.Network
 				NetBitWriter.WriteUInt32((UInt32)source, 32, Data, m_bitLength);
 			}
 			m_bitLength += 32;
+			return this;
 		}
 #else
 		/// <summary>
 		/// Writes a 32 bit signed integer
 		/// </summary>
-		public void Write(Int32 source)
+		public NetBuffer Write(Int32 source)
 		{
 			EnsureBufferSize(m_bitLength + 32);
 			NetBitWriter.WriteUInt32((UInt32)source, 32, m_data, m_bitLength);
 			m_bitLength += 32;
+			return this;
 		}
 #endif
 
@@ -265,7 +271,7 @@ namespace Lidgren.Network
 		/// <summary>
 		/// Writes a 32 bit unsigned integer
 		/// </summary>
-		public unsafe void Write(UInt32 source)
+		public unsafe NetBuffer Write(UInt32 source)
 		{
 			EnsureBufferSize(m_bitLength + 32);
 
@@ -283,17 +289,19 @@ namespace Lidgren.Network
 			}
 
 			m_bitLength += 32;
+			return this;
 		}
 #else
 		/// <summary>
 		/// Writes a 32 bit unsigned integer
 		/// </summary>
 		[CLSCompliant(false)]
-		public void Write(UInt32 source)
+		public NetBuffer Write(UInt32 source)
 		{
 			EnsureBufferSize(m_bitLength + 32);
 			NetBitWriter.WriteUInt32(source, 32, m_data, m_bitLength);
 			m_bitLength += 32;
+			return this;
 		}
 #endif
 
@@ -348,11 +356,12 @@ namespace Lidgren.Network
 		/// Writes a 64 bit unsigned integer
 		/// </summary>
 		[CLSCompliant(false)]
-		public void Write(UInt64 source)
+		public NetBuffer Write(UInt64 source)
 		{
 			EnsureBufferSize(m_bitLength + 64);
 			NetBitWriter.WriteUInt64(source, 64, m_data, m_bitLength);
 			m_bitLength += 64;
+			return this;
 		}
 
 		/// <summary>
@@ -381,12 +390,13 @@ namespace Lidgren.Network
 		/// <summary>
 		/// Writes a 64 bit signed integer
 		/// </summary>
-		public void Write(Int64 source)
+		public NetBuffer Write(Int64 source)
 		{
 			EnsureBufferSize(m_bitLength + 64);
 			ulong usource = (ulong)source;
 			NetBitWriter.WriteUInt64(usource, 64, m_data, m_bitLength);
 			m_bitLength += 64;
+			return this;
 		}
 
 		/// <summary>
@@ -419,7 +429,7 @@ namespace Lidgren.Network
 		/// <summary>
 		/// Writes a 32 bit floating point value
 		/// </summary>
-		public void Write(float source)
+		public NetBuffer Write(float source)
 		{
 			// Use union to avoid BitConverter.GetBytes() which allocates memory on the heap
 			SingleUIntUnion su;
@@ -431,6 +441,7 @@ namespace Lidgren.Network
 			su.UIntValue = NetUtility.SwapByteOrder(su.UIntValue);
 #endif
 			Write(su.UIntValue);
+			return this;
 		}
 #endif
 
@@ -616,18 +627,19 @@ namespace Lidgren.Network
 		/// <summary>
 		/// Write a string
 		/// </summary>
-		public void Write(string source)
+		public NetBuffer Write(string source)
 		{
 			if (string.IsNullOrEmpty(source))
 			{
 				WriteVariableUInt32(0);
-				return;
+				return this;
 			}
 
 			byte[] bytes = Encoding.UTF8.GetBytes(source);
 			EnsureBufferSize(m_bitLength + 8 + (bytes.Length * 8));
 			WriteVariableUInt32((uint)bytes.Length);
 			Write(bytes);
+			return this;
 		}
 
 		/// <summary>

@@ -13,7 +13,7 @@ namespace Lidgren.Network
 	/// Represents a connection to a remote peer
 	/// </summary>
 	[DebuggerDisplay("RemoteUniqueIdentifier={RemoteUniqueIdentifier} RemoteEndPoint={m_remoteEndPoint}")]
-	public partial class NetConnection
+	public partial class NetConnection : INetConnection
 	{
 		private const int m_infrequentEventsSkipFrames = 8; // number of heartbeats to skip checking for infrequent events (ping, timeout etc)
 		private const int m_messageCoalesceFrames = 3; // number of heartbeats to wait for more incoming messages before sending packet

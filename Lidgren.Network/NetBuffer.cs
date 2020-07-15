@@ -4,8 +4,20 @@ using System.Reflection;
 
 namespace Lidgren.Network
 {
-	public partial class NetBuffer
+	public partial class NetBuffer : IReader, IWriter
 	{
+		// this bullshit is unfortunately necessary because C# does not have return type covariance (yet (C# 9.0 pls))
+		IWriter IWriter.Write(byte d) => Write(d);
+		IWriter IWriter.Write(int d) => Write(d);
+		IWriter IWriter.Write(uint d) => Write(d);
+		IWriter IWriter.Write(short d) => Write(d);
+		IWriter IWriter.Write(ushort d) => Write(d);
+		IWriter IWriter.Write(long d) => Write(d);
+		IWriter IWriter.Write(ulong d) => Write(d);
+		IWriter IWriter.Write(float d) => Write(d);
+		IWriter IWriter.Write(bool d) => Write(d);
+		IWriter IWriter.Write(string d) => Write(d);
+
 		/// <summary>
 		/// Number of bytes to overallocate for each message to avoid resizing
 		/// </summary>
