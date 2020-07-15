@@ -19,6 +19,9 @@
     <Compile Include="..\Lidgren.Network\Encryption\NetXorEncryption.cs" Link="Encryption\NetXorEncryption.cs" />
     <Compile Include="..\Lidgren.Network\Encryption\NetXteaEncryption.cs" Link="Encryption\NetXteaEncryption.cs" />
     <Compile Include="..\Lidgren.Network\NamespaceDoc.cs" Link="NamespaceDoc.cs" />
+    <Compile Include="..\Lidgren.Network\INetConnection.cs" Link="INetConnection.cs" />
+    <Compile Include="..\Lidgren.Network\IReader.cs" Link="IReader.cs" />
+    <Compile Include="..\Lidgren.Network\IWriter.cs" Link="IWriter.cs" />
     <Compile Include="..\Lidgren.Network\NetBigInteger.cs" Link="NetBigInteger.cs" />
     <Compile Include="..\Lidgren.Network\NetBitVector.cs" Link="NetBitVector.cs" />
     <Compile Include="..\Lidgren.Network\NetBitWriter.cs" Link="NetBitWriter.cs" />
