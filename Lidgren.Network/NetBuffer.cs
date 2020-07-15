@@ -15,8 +15,10 @@ namespace Lidgren.Network
 		IWriter IWriter.Write(long d) => Write(d);
 		IWriter IWriter.Write(ulong d) => Write(d);
 		IWriter IWriter.Write(float d) => Write(d);
-		IWriter IWriter.Write(bool d) => Write(d);
+		IWriter IWriter.Write(bool d) => Write(d ? (byte)0 : (byte)1);
 		IWriter IWriter.Write(string d) => Write(d);
+
+		bool IReader.ReadBoolean() => ReadByte() == 1;
 
 		/// <summary>
 		/// Number of bytes to overallocate for each message to avoid resizing
