@@ -34,7 +34,20 @@ namespace Lidgren.Network
 				{
 					return null;
 				}
-				return IPAddress.Parse(UnityEngine.Network.player.externalIP);
+
+				IPHostEntry host;
+				string localIP = "0.0.0.0";
+				host = Dns.GetHostEntry(Dns.GetHostName());
+				foreach (IPAddress ip in host.AddressList)
+				{
+					if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+					{
+						localIP = ip.ToString();
+						break;
+					}
+				}
+				
+				return IPAddress.Parse(localIP);
 			}
 			catch // Catch Access Denied errors
 			{
