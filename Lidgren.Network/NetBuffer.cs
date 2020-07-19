@@ -15,7 +15,7 @@ namespace Lidgren.Network
 		IWriter IWriter.Write(long d) => Write(d);
 		IWriter IWriter.Write(ulong d) => Write(d);
 		IWriter IWriter.Write(float d) => Write(d);
-		IWriter IWriter.Write(bool d) => Write(d ? (byte)0 : (byte)1);
+		IWriter IWriter.Write(bool d) => Write(d ? (byte)1 : (byte)0);
 		IWriter IWriter.Write(string d) => Write(d);
 
 		bool IReader.ReadBoolean() => ReadByte() == 1;
