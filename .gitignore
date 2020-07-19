@@ -15,6 +15,7 @@ local.properties
 .classpath
 .settings/
 .loadpath
+!Lidgren.Network/Lidgren.Network.asmdef.meta
 
 # External tool builders
 .externalToolBuilders/
