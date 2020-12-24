@@ -13,36 +13,38 @@ namespace Lidgren.Network
 		/// <summary>
 		/// Emit a discovery signal to all hosts on your subnet
 		/// </summary>
-		public void DiscoverLocalPeers(int serverPort)
+		public void DiscoverLocalPeers(int serverPort, NetOutgoingMessage message = null)
 		{
-			NetOutgoingMessage um = CreateMessage(0);
-			um.m_messageType = NetMessageType.Discovery;
-			Interlocked.Increment(ref um.m_recyclingCount);
+            message = message ?? CreateMessage(0);
 
-			m_unsentUnconnectedMessages.Enqueue(new NetTuple<NetEndPoint, NetOutgoingMessage>(new NetEndPoint(NetUtility.GetBroadcastAddress(), serverPort), um));
+            message.m_messageType = NetMessageType.Discovery;
+			Interlocked.Increment(ref message.m_recyclingCount);
+
+			m_unsentUnconnectedMessages.Enqueue(new NetTuple<NetEndPoint, NetOutgoingMessage>(new NetEndPoint(NetUtility.GetBroadcastAddress(), serverPort), message));
 		}
 
 		/// <summary>
 		/// Emit a discovery signal to a single known host
 		/// </summary>
-		public bool DiscoverKnownPeer(string host, int serverPort)
+		public bool DiscoverKnownPeer(string host, int serverPort, NetOutgoingMessage message = null)
 		{
 			var address = NetUtility.Resolve(host);
 			if (address == null)
 				return false;
-			DiscoverKnownPeer(new NetEndPoint(address, serverPort));
+			DiscoverKnownPeer(new NetEndPoint(address, serverPort), message);
 			return true;
 		}
 
 		/// <summary>
 		/// Emit a discovery signal to a single known host
 		/// </summary>
-		public void DiscoverKnownPeer(NetEndPoint endPoint)
+		public void DiscoverKnownPeer(NetEndPoint endPoint, NetOutgoingMessage message = null)
 		{
-			NetOutgoingMessage om = CreateMessage(0);
-			om.m_messageType = NetMessageType.Discovery;
-			om.m_recyclingCount = 1;
-			m_unsentUnconnectedMessages.Enqueue(new NetTuple<NetEndPoint, NetOutgoingMessage>(endPoint, om));
+			message = message ?? CreateMessage(0);
+
+			message.m_messageType = NetMessageType.Discovery;
+			message.m_recyclingCount = 1;
+			m_unsentUnconnectedMessages.Enqueue(new NetTuple<NetEndPoint, NetOutgoingMessage>(endPoint, message));
 		}
 
 		/// <summary>
