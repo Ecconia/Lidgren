@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 
 #if !__NOIPENDPOINT__
@@ -20,7 +21,11 @@ namespace Lidgren.Network
             message.m_messageType = NetMessageType.Discovery;
 			Interlocked.Increment(ref message.m_recyclingCount);
 
-			m_unsentUnconnectedMessages.Enqueue(new NetTuple<NetEndPoint, NetOutgoingMessage>(new NetEndPoint(NetUtility.GetBroadcastAddress(), serverPort), message));
+            var broadcastAddress = NetUtility.GetBroadcastAddress();
+            if (this.Configuration.LocalAddress.AddressFamily == AddressFamily.InterNetworkV6)
+                broadcastAddress = broadcastAddress.MapToIPv6();
+
+            m_unsentUnconnectedMessages.Enqueue(new NetTuple<NetEndPoint, NetOutgoingMessage>(new NetEndPoint(broadcastAddress, serverPort), um));
 		}
 
 		/// <summary>
