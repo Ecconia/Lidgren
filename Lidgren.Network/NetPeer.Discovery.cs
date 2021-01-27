@@ -25,7 +25,7 @@ namespace Lidgren.Network
             if (this.Configuration.LocalAddress.AddressFamily == AddressFamily.InterNetworkV6)
                 broadcastAddress = broadcastAddress.MapToIPv6();
 
-            m_unsentUnconnectedMessages.Enqueue(new NetTuple<NetEndPoint, NetOutgoingMessage>(new NetEndPoint(broadcastAddress, serverPort), um));
+            m_unsentUnconnectedMessages.Enqueue(new NetTuple<NetEndPoint, NetOutgoingMessage>(new NetEndPoint(broadcastAddress, serverPort), message));
 		}
 
 		/// <summary>
