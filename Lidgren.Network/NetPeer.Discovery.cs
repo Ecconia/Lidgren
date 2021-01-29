@@ -21,9 +21,9 @@ namespace Lidgren.Network
             message.m_messageType = NetMessageType.Discovery;
 			Interlocked.Increment(ref message.m_recyclingCount);
 
-            var broadcastAddress = NetUtility.GetBroadcastAddress();
-            if (this.Configuration.LocalAddress.AddressFamily == AddressFamily.InterNetworkV6)
-                broadcastAddress = broadcastAddress.MapToIPv6();
+			var broadcastAddress = NetUtility.GetBroadcastAddress();
+			if (m_configuration.DualStack)
+				broadcastAddress = NetUtility.MapToIPv6(broadcastAddress);
 
             m_unsentUnconnectedMessages.Enqueue(new NetTuple<NetEndPoint, NetOutgoingMessage>(new NetEndPoint(broadcastAddress, serverPort), message));
 		}
@@ -45,6 +45,11 @@ namespace Lidgren.Network
 		/// </summary>
 		public void DiscoverKnownPeer(NetEndPoint endPoint, NetOutgoingMessage message = null)
 		{
+			if (endPoint == null)
+				throw new ArgumentNullException(nameof(endPoint));
+			if (m_configuration.DualStack)
+				endPoint = NetUtility.MapToIPv6(endPoint);
+
 			message = message ?? CreateMessage(0);
 
 			message.m_messageType = NetMessageType.Discovery;
