@@ -21,8 +21,8 @@ namespace Lidgren.Network
 			Interlocked.Increment(ref um.m_recyclingCount);
 
 			var broadcastAddress = NetUtility.GetBroadcastAddress();
-			if (this.Configuration.LocalAddress.AddressFamily == AddressFamily.InterNetworkV6)
-				broadcastAddress = broadcastAddress.MapToIPv6();
+			if (m_configuration.DualStack)
+				broadcastAddress = NetUtility.MapToIPv6(broadcastAddress);
 
 			m_unsentUnconnectedMessages.Enqueue(new NetTuple<NetEndPoint, NetOutgoingMessage>(new NetEndPoint(broadcastAddress, serverPort), um));
 		}
