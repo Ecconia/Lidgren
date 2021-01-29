@@ -44,6 +44,11 @@ namespace Lidgren.Network
 		/// </summary>
 		public void DiscoverKnownPeer(NetEndPoint endPoint)
 		{
+			if (endPoint == null)
+				throw new ArgumentNullException(nameof(endPoint));
+			if (m_configuration.DualStack)
+				endPoint = NetUtility.MapToIPv6(endPoint);
+
 			NetOutgoingMessage om = CreateMessage(0);
 			om.m_messageType = NetMessageType.Discovery;
 			om.m_recyclingCount = 1;
