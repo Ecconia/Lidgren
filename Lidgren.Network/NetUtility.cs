@@ -489,5 +489,15 @@ namespace Lidgren.Network
                 return new IPEndPoint(endPoint.Address.MapToIPv6(), endPoint.Port);
             return endPoint;
         }
+
+        /// <summary>
+        /// Maps the IPAddress object to an IPv6 address. Has allocation
+        /// </summary>
+        internal static IPAddress MapToIPv6(IPAddress address)
+        {
+            if (address.AddressFamily == AddressFamily.InterNetwork)
+                return address.MapToIPv6();
+            return address;
+        }
     }
 }
