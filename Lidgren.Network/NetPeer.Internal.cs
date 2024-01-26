@@ -41,6 +41,8 @@ namespace Lidgren.Network
 		private AutoResetEvent m_messageReceivedEvent;
 		private List<NetTuple<SynchronizationContext, SendOrPostCallback>> m_receiveCallbacks;
 
+		private readonly Mutex m_socketBindMutex = new Mutex(false);
+
 		/// <summary>
 		/// Gets the socket, if Start() has been called
 		/// </summary>
@@ -69,7 +71,7 @@ namespace Lidgren.Network
 				return;
 
 			// remove all callbacks regardless of sync context
-            m_receiveCallbacks.RemoveAll(tuple => tuple.Item2.Equals(callback));
+			m_receiveCallbacks.RemoveAll(tuple => tuple.Item2.Equals(callback));
 
 			if (m_receiveCallbacks.Count < 1)
 				m_receiveCallbacks = null;
@@ -116,53 +118,50 @@ namespace Lidgren.Network
 			}
 			m_lastSocketBind = now;
 
-			using (var mutex = new Mutex(false, "Global\\lidgrenSocketBind"))
+			try
 			{
+				m_socketBindMutex.WaitOne();
+
+				if (m_socket == null)
+					m_socket = new Socket(m_configuration.LocalAddress.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
+
+				if (reBind)
+					m_socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, (int)1);
+
+				m_socket.ReceiveBufferSize = m_configuration.ReceiveBufferSize;
+				m_socket.SendBufferSize = m_configuration.SendBufferSize;
+				m_socket.Blocking = false;
+
+				if (m_configuration.DualStack)
+				{
+					if (m_configuration.LocalAddress.AddressFamily != AddressFamily.InterNetworkV6)
+					{
+						LogWarning("Configuration specifies Dual Stack but does not use IPv6 local address; Dual stack will not work.");
+					}
+					else
+					{
+						m_socket.DualMode = true;
+					}
+				}
+
+				var ep = (EndPoint)new NetEndPoint(m_configuration.LocalAddress, reBind ? m_listenPort : m_configuration.Port);
+				m_socket.Bind(ep);
+
 				try
 				{
-					mutex.WaitOne();
-
-					if (m_socket == null)
-						m_socket = new Socket(m_configuration.LocalAddress.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
-
-					if (reBind)
-						m_socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, (int)1);
-
-					m_socket.ReceiveBufferSize = m_configuration.ReceiveBufferSize;
-					m_socket.SendBufferSize = m_configuration.SendBufferSize;
-					m_socket.Blocking = false;
-
-                    if (m_configuration.DualStack)
-                    {
-                        if (m_configuration.LocalAddress.AddressFamily != AddressFamily.InterNetworkV6)
-                        {
-                            LogWarning("Configuration specifies Dual Stack but does not use IPv6 local address; Dual stack will not work.");
-                        }
-                        else
-                        {
-                            m_socket.DualMode = true;
-                        }
-                    }
-
-                    var ep = (EndPoint)new NetEndPoint(m_configuration.LocalAddress, reBind ? m_listenPort : m_configuration.Port);
-					m_socket.Bind(ep);
-
-					try
-					{
-						const uint IOC_IN = 0x80000000;
-						const uint IOC_VENDOR = 0x18000000;
-						uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
-						m_socket.IOControl((int)SIO_UDP_CONNRESET, new byte[] { Convert.ToByte(false) }, null);
-					}
-					catch
-					{
-						// ignore; SIO_UDP_CONNRESET not supported on this platform
-					}
+					const uint IOC_IN = 0x80000000;
+					const uint IOC_VENDOR = 0x18000000;
+					uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
+					m_socket.IOControl((int)SIO_UDP_CONNRESET, new byte[] { Convert.ToByte(false) }, null);
 				}
-				finally
+				catch
 				{
-					mutex.ReleaseMutex();
+					// ignore; SIO_UDP_CONNRESET not supported on this platform
 				}
+			}
+			finally
+			{
+				m_socketBindMutex.ReleaseMutex();
 			}
 
 			var boundEp = m_socket.LocalEndPoint as NetEndPoint;
@@ -279,7 +278,7 @@ namespace Lidgren.Network
 						{
 							m_socket.Shutdown(SocketShutdown.Receive);
 						}
-						catch(Exception ex)
+						catch (Exception ex)
 						{
 							LogDebug("Socket.Shutdown exception: " + ex.ToString());
 						}
@@ -406,8 +405,8 @@ namespace Lidgren.Network
 				}
 			}
 
-            if (m_upnp != null)
-                m_upnp.CheckForDiscoveryTimeout();
+			if (m_upnp != null)
+				m_upnp.CheckForDiscoveryTimeout();
 
 			//
 			// read from socket
@@ -424,39 +423,39 @@ namespace Lidgren.Network
 			// update now
 			now = NetTime.Now;
 
-            try
-            {
-		        do
-                {
-                    ReceiveSocketData(now);
-                } while (m_socket.Available > 0);
-            }
-            catch (SocketException sx)
-            {
-                switch (sx.SocketErrorCode)
-                {
-                    case SocketError.ConnectionReset:
-                        // connection reset by peer, aka connection forcibly closed aka "ICMP port unreachable"
-                        // we should shut down the connection; but m_senderRemote seemingly cannot be trusted, so which connection should we shut down?!
-                        // So, what to do?
-                        LogWarning("ConnectionReset");
-                        return;
+			try
+			{
+				do
+				{
+					ReceiveSocketData(now);
+				} while (m_socket.Available > 0);
+			}
+			catch (SocketException sx)
+			{
+				switch (sx.SocketErrorCode)
+				{
+					case SocketError.ConnectionReset:
+						// connection reset by peer, aka connection forcibly closed aka "ICMP port unreachable"
+						// we should shut down the connection; but m_senderRemote seemingly cannot be trusted, so which connection should we shut down?!
+						// So, what to do?
+						LogWarning("ConnectionReset");
+						return;
 
-                    case SocketError.NotConnected:
-                        // socket is unbound; try to rebind it (happens on mobile when process goes to sleep)
-                        BindSocket(true);
-                        return;
+					case SocketError.NotConnected:
+						// socket is unbound; try to rebind it (happens on mobile when process goes to sleep)
+						BindSocket(true);
+						return;
 
-                    default:
-                        LogWarning("Socket exception: " + sx.ToString());
-                        return;
-                }
-            }
+					default:
+						LogWarning("Socket exception: " + sx.ToString());
+						return;
+				}
+			}
 		}
 
-        private void ReceiveSocketData(double now)
-        {
-            int bytesReceived = m_socket.ReceiveFrom(m_receiveBuffer, 0, m_receiveBuffer.Length, SocketFlags.None, ref m_senderRemote);
+		private void ReceiveSocketData(double now)
+		{
+			int bytesReceived = m_socket.ReceiveFrom(m_receiveBuffer, 0, m_receiveBuffer.Length, SocketFlags.None, ref m_senderRemote);
 
 			if (bytesReceived < NetConstants.HeaderByteSize)
 				return;
@@ -590,9 +589,9 @@ namespace Lidgren.Network
 			m_statistics.PacketReceived(bytesReceived, numMessages, numFragments);
 			if (sender != null)
 				sender.m_statistics.PacketReceived(bytesReceived, numMessages, numFragments);
-        }
+		}
 
-        /// <summary>
+		/// <summary>
 		/// If NetPeerConfiguration.AutoFlushSendQueue() is false; you need to call this to send all messages queued using SendMessage()
 		/// </summary>
 		public void FlushSendQueue()
