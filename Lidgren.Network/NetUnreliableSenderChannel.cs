@@ -60,11 +60,11 @@ namespace Lidgren.Network
 			}
 
 			m_queuedSends.Enqueue(message);
-			m_connection.m_peer.m_needFlushSendQueue = true; // a race condition to this variable will simply result in a single superflous call to FlushSendQueue()
+			m_connection.m_peer.m_needFlushSendQueue = true; // a race condition to this variable will simply result in a single superfluous call to FlushSendQueue()
 			return NetSendResult.Sent;
 		}
 
-		// call this regularely
+		// call this regularly
 		internal override void SendQueuedMessages(double now)
 		{
 			int num = GetAllowedSends();

@@ -105,7 +105,7 @@ namespace Lidgren.Network
 		}
 
 		/// <summary>
-		/// Gets the configuration used to instanciate this NetPeer
+		/// Gets the configuration used to instantiate this NetPeer
 		/// </summary>
 		public NetPeerConfiguration Configuration { get { return m_configuration; } }
 

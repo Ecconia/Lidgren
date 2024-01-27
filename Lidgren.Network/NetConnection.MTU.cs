@@ -74,7 +74,7 @@ namespace Lidgren.Network
 		{
 			int tryMTU;
 
-			// we've nevered encountered failure
+			// we've never encountered failure
 			if (m_smallestFailedMTU == -1)
 			{
 				// we've never encountered failure; expand by 25% each time
