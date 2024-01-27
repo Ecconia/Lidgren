@@ -380,7 +380,7 @@ namespace Lidgren.Network
 				int channelSlot = (int)method - 1 + sequenceChannel;
 				if (m_sendChannels[channelSlot] != null)
 				{
-					// we were pre-empted by another call to this method
+					// we were preempted by another call to this method
 					chan = m_sendChannels[channelSlot];
 				}
 				else
@@ -468,7 +468,7 @@ namespace Lidgren.Network
 				case NetMessageType.ExpandMTUSuccess:
 					if (m_peer.Configuration.AutoExpandMTU == false)
 					{
-						m_peer.LogDebug("Received ExpandMTURequest altho AutoExpandMTU is turned off!");
+						m_peer.LogDebug("Received ExpandMTURequest although AutoExpandMTU is turned off!");
 						break;
 					}
 					NetIncomingMessage emsg = m_peer.SetupReadHelperMessage(ptr, payloadLength);

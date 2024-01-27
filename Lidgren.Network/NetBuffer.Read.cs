@@ -17,7 +17,7 @@ namespace Lidgren.Network
 	public partial class NetBuffer
 	{
 		private const string c_readOverflowError = "Trying to read past the buffer size - likely caused by mismatching Write/Reads, different size or order.";
-		private const int c_bufferSize = 64; // Min 8 to hold anything but strings. Increase it if readed strings usally don't fit inside the buffer
+		private const int c_bufferSize = 64; // Min 8 to hold anything but strings. Increase it if read strings usually don't fit inside the buffer
 		private static object s_buffer;
 
 		/// <summary>

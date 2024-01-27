@@ -307,7 +307,7 @@ namespace Lidgren.Network
 		}
 
 		/// <summary>
-		/// Enables or disables automatic flushing of the send queue. If disabled, you must manully call NetPeer.FlushSendQueue() to flush sent messages to network.
+		/// Enables or disables automatic flushing of the send queue. If disabled, you must manually call NetPeer.FlushSendQueue() to flush sent messages to network.
 		/// </summary>
 		public bool AutoFlushSendQueue
 		{

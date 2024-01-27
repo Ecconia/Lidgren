@@ -1157,7 +1157,7 @@ namespace Lidgren.Network
 					{
 						// Montgomery square algo doesn't exist, and a normal
 						// square followed by a Montgomery reduction proved to
-						// be almost as heavy as a Montgomery mulitply.
+						// be almost as heavy as a Montgomery multiply.
 						MultiplyMonty(yAccum, yVal, yVal, m.m_magnitude, mQ);
 					}
 					else
